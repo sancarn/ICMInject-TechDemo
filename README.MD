@@ -16,11 +16,11 @@ A tech demo for ICMInjector.ahk
 
 This is what the GUI will look like normally:
 
-![closed](Docs\Closed.png)
+![closed](.\Docs\Closed.png)
 
 When the lower right button is clicked the GUI will look like this:
 
-![open](Docs\Open.png)
+![open](.\Docs\Open.png)
 
 Here you will be able to select a selection list to perform operations on.
 
