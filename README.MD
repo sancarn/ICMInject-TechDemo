@@ -16,11 +16,11 @@ A tech demo for ICMInjector.ahk
 
 This is what the GUI will look like normally:
 
-![closed](resources\closed)
+![closed](\resources\closed)
 
 When the lower right button is clicked the GUI will look like this:
 
-![open](resources\open)
+![open](\resources\open)
 
 Here you will be able to select a selection list to perform operations on.
 
