@@ -3,22 +3,56 @@
 	<head>
 		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
 		<meta charset='utf-8'>
-		<base href='%mainDirURI%'>
+		<!--base href='%mainDirURI%'-->
 		<link rel="stylesheet" type="text/css" href="main.css">
 		<title>ICM Tools</title>
-		<script src="web_libs\ace\ace.js" type="text/javascript" charset="utf-8"></script>
-		<!--script src="web_libs\jstree\jstree.min.js" type="text/javascript" charset="utf-8"></script-->
+		<script>
+			// r.SL_Select(1)
+			// r.SL_Select({a:1,b:{a:1,b:2,c:[1,2,3]}})
+			
+			window.addEventListener("load",function(){
+				window.r = {}
+				Object.keys(window.rb).forEach(function(key){
+					window.r[key] = registerScript(window.rb[key])
+				})
+			})
+			
+			function registerScript(func){
+				var data = /function\s*(.*?)\s*\((.*?)\){\s*?\/\*((.|\s)*?)\*\/\s*?}/.exec(func.toString())
+				var aArgs = data[2].split(",")
+				var rbBody = data[3]
+				
+				sArgs=JSON.stringify("require('json');\n") + "+\n"
+				aArgs.forEach(function(argument){
+					sArgs = sArgs + JSON.stringify(argument) + "+" + JSON.stringify("= JSON.parse(") + "+" + "prepareArgument(" + argument + ")" + "+" + JSON.stringify(");\n")
+				})
+				
+				var jsBody = "var data = " + sArgs + "+" + JSON.stringify(rbBody) + "; console.log(data)"
+				var aCons = aArgs
+				aCons.push(jsBody)
+				return (Function.constructor.apply(this,aCons))
+			}
+			function prepareArgument(arg){
+				try {
+					return JSON.stringify(JSON.stringify(arg))
+				} catch(e) {
+					console.log(arg)
+					throw new Error("Error in prepareArgument")
+				}
+			}
+		</script>
 		
-		<script register>
-			document.rb = document.rb ? document.rb : {}
-			document.rb["SL_Recent"] = function(){/*
+		
+		<script>
+			window.rb = window.rb ? window.rb : {}
+			window.rb["SL_Recent"] = function(){/*
 			    require_relative('libs\WSLocalStorage.rb')
 				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
 				selectionLists = WSApplication.current_database.model_object_collection('Selection list')
 				localStorage[:id] = selectionLists[-1].id
 			*/}
 			
-			document.rb["SL_Append"] = function(){/*
+			window.rb["SL_Append"] = function(){/*
 				require_relative('libs\WSLocalStorage.rb')
 				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
 				if localStorage[:id]
@@ -28,7 +62,7 @@
 				end
 			*/}
 			
-			document.rb["SL_Subtract"] = function(){/*
+			window.rb["SL_Subtract"] = function(){/*
 				require_relative('libs\WSLocalStorage.rb')
 				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
 				if localStorage[:id]
@@ -57,7 +91,7 @@
 				end
 			*/}
 			
-			document.rb["SL_Clear"] = function(){/*
+			window.rb["SL_Clear"] = function(){/*
 				require_relative('libs\WSLocalStorage.rb')
 				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
 				if localStorage[:id]
@@ -67,7 +101,7 @@
 				end
 			*/}
 			
-			document.rb["SL_Overwrite"] = function(){/*
+			window.rb["SL_Overwrite"] = function(){/*
 				require_relative('libs\WSLocalStorage.rb')
 				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
 				if localStorage[:id]
@@ -75,13 +109,13 @@
 				end
 			*/}
 			
-			document.rb["SL_Select"] = function(id){/*
+			window.rb["SL_Select"] = function(id){/*
 				require_relative('libs\WSLocalStorage.rb')
 				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
 				localStorage[:id] = id
 			*/}
 			
-			document.rb["SL_Temporary"] = function(){/*
+			window.rb["SL_Temporary"] = function(){/*
 				require_relative('libs\WSLocalStorage.rb')
 				require_relative('libs\WSVirtualSL.rb')
 				
@@ -91,55 +125,12 @@
 				if localStorage[:tmp_list]
 				  localStorage[:tmp_list].push(sl)
 				  localStorage[:isTemporary] = true
-				  next localStorage[:tmp_list].length
+				  return localStorage[:tmp_list].length
 				end
 			*/}
-			
-			
-			// document.rb["SL_Select"]=registerScript(document.rb["SL_Select"])
-			// document.rb["SL_Select"](1)
-			// document.rb["SL_Select"]({a:1,b:{a:1,b:2,c:[1,2,3]}})
-			
-			function registerScript(func){
-				var data = /function\s*(.*?)\s*\((.*?)\){\s*?\/\*((.|\s)*?)\*\/\s*?}/.exec(func.toString())
-				var aArgs = data[2].split(",")
-				var rbBody = data[3]
-				
-				sArgs=JSON.stringify("require('json');\n") + "+\n"
-				aArgs.forEach(function(argument){
-					sArgs = sArgs + JSON.stringify(argument) + "+" + JSON.stringify("= JSON.parse(") + "+" + "prepareArgument(" + argument + ")" + "+" + JSON.stringify(");\n")
-				})
-				
-				console.log(sArgs)
-				
-				var jsBody = "var data = " + sArgs + "+" + JSON.stringify(rbBody) + "; console.log(data)"
-				var aCons = aArgs
-				aCons.push(jsBody)
-				return (Function.constructor.apply(this,aCons))
-			}
-			function prepareArgument(arg){
-				try {
-					return JSON.stringify(JSON.stringify(arg))
-				} catch(e) {
-					console.log(arg)
-					throw new Error("Error in prepareArgument")
-				}
-			}
 		</script>
-		
-		
-		<!--   Require Main.JS    -->
-		<script src=Main.js></script>
 	</head>
 	<body>
-		<div class="tab">
-		  <button class="tablinks" onclick="openTab(event, 'Geoplan')" id="defaultOpen">Geoplan</button>
-		  <button class="tablinks" onclick="openTab(event, 'Build')">Model Build</button>
-		  <button class="tablinks" onclick="openTab(event, 'Ruby CLI')">Ruby CLI</button>
-		  <button class="tablinks" onclick="openTab(event, 'JS CLI')">JS CLI</button>
-		  <button class="tablinks" onclick="ExitApp()" style="float:right;">X</button>
-		</div>
-
 		<div id="Geoplan" class="tabcontent">
 			<button class="ribButton" onclick='handle("USTrace")'>
 				<div class="image" style="background-image:url('img\\SelectionTool_UpstreamTrace.png');"></div>
@@ -153,52 +144,6 @@
 					<span>DS Trace</span>
 				</div>
 			</button>
-		</div>
-		
-		<!--
-			* STW Node naming _New,_JN,_PU,...
-			* Node,Link,Subcatchment
-			* 
-		-->
-		
-		<div id="Build" class="tabcontent">
-			<div class="ribbonButtons">
-				<button class="ribButton" onclick='handle("?")'>
-					<div class="image" style="background-image:url('img\\');"></div>
-					<div class="describer">
-						<span>New node</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='handle("?")'>
-					<div class="image" style="background-image:url('img\\');"></div>
-					<div class="describer">
-						<span>New junction</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='handle("?")'>
-					<div class="image" style="background-image:url('img\\');"></div>
-					<div class="describer">
-						<span>New asset</span>
-					</div>
-				</button>
-				
-				<button class="ribButton" onclick='handle("?")'>
-					<div class="image" style="background-image:url('img\\');"></div>
-					<div class="describer">
-						<span>Validate</span>
-					</div>
-				</button>
-			</div>
-		</div>
-
-		<div id="Ruby CLI" style="height:600px;" class="tabcontent">
-		    <!--textarea style="height:100%; width:100%" onkeypress="return RubyCLIKeyHandler();"></textarea-->
-		    <div id="rubyEditor" class="codeEditor getFocus" style="height:100%; width:100%"></div>
-		</div>
-		
-		<div id="JS CLI" style="height:600px;" class="tabcontent">
-		    <!--textarea style="height:100%; width:100%" onkeypress="return RubyCLIKeyHandler();"></textarea-->
-			<div id="jsEditor" class="codeEditor getFocus" style="height:100%; width:100%"></div>
 		</div>
 	</body>
 </html>

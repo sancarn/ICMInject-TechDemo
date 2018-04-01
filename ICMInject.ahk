@@ -2,11 +2,8 @@ Global CONST_RUBY_INJECTOR_TEXT := "DEV: RubyScript Inject"
 Global DEFAULT_FILE             := "injector.rb"
 Global WM_COMMAND               := 0x111
 
-;/*
+
 class Injector {
-    
-	
-	
 	static modes      := {}
     static scripts    := {}
     static addonAddrs := {}
@@ -215,7 +212,6 @@ class Injector {
 			this.callbacks[pid].call("closing",data)
 	}
 }
-;*/
 
 
 
@@ -223,14 +219,6 @@ class Injector {
 ;$t = WIN32OLE.connect("{5c172d3c-c8bf-47b0-80a4-a455420a6911}")
 ;$t.scripts[$$]
 ObjRegisterActive(Injector,"{5c172d3c-c8bf-47b0-80a4-a455420a6911}")
-
-
-
-;DEBUGGING:
-
-;msgbox, % Injector.__checkInstall(1)
-cmd = puts "hello world"
-result :=  Injector.execute(cmd)
 
 if result=1
 	TrayTip, ICMInject, The ruby script injected successfully., 0.1, 16+1

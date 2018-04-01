@@ -1,6 +1,5 @@
 ﻿#NoEnv
 #MaxMem 4095
-;#SingleInstance Off
 #SingleInstance, Force
 
 
