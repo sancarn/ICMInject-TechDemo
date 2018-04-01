@@ -12,3 +12,15 @@ A tech demo for ICMInjector.ahk
 
 * ICMInjector.ahk - The engine which is capable of executing ruby scripts (pseudo-dynamically) with ICM.
 
+# Design Preview
+
+This is what the GUI will look like normally:
+
+![closed](resources\closed)
+
+When the lower right button is clicked the GUI will look like this:
+
+![open](resources\open)
+
+Here you will be able to select a selection list to perform operations on.
+
