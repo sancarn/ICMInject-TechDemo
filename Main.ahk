@@ -130,6 +130,7 @@ OnExit, LabelOnExit
 ; Further reading:
 ; 	● http://ahkscript.org/boards/viewtopic.php?t=5714&p=33477#p33477
 ; 	● http://ahkscript.org/boards/viewtopic.php?f=14&t=5778
+Gui,+ToolWindow +AlwaysOnTop
 Gui, Add, ActiveX, w%WIDTH% h%HEIGHT% x0 y0 vwb, Shell.Explorer
 wb.Navigate("about:<!DOCTYPE html><meta http-equiv='X-UA-Compatible' content='IE=edge'>")
 while wb.readyState < 4
@@ -220,8 +221,9 @@ JS.registerAccessor("Clipboard", Func("_Clipboard")) ; exception: Clipboard is r
 JS.registerAccessor("ErrorLevel", Func("_ErrorLevel")) ; exception: ErrorLevel is read-write
 
 ; Custom function for resizing gui based on html size
-JS.registerFunction("gui_resize", Func("WB_Resize"))
-
+JS.registerFunction("guiResize", Func("WB_Resize"))
+JS.registerFunction("injectRubyScript", Func("injectRubyScript"))
+JS.registerFunction("msgbox",Func("msg"))
 ; __________________________________________________________________________________________________
 ; Evaluate the main JS.
 ; Note that there are 4 ways to add the main JS script:
@@ -266,8 +268,25 @@ WB_TitleChange(event,newTitle){
 	Gui, Show, , %newTitle%
 }
 
+;Custom function for resizing gui
 WB_Resize(w,h){
 	Gui, Show, W%w% H%h%
+}
+
+;Custom function for injecting ruby script
+injectRubyScript(data,pid){
+	if window.debugMode
+	{
+		msgbox, %pid%:`n%data%
+	} else {
+		;INJECT
+		msgbox, todo
+	}
+}
+
+;Custom function mostly for debugging
+msg(message){
+	msgbox, %message%
 }
 
 

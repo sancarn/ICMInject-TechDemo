@@ -1,149 +1,211 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
-		<meta charset='utf-8'>
-		<!--base href='%mainDirURI%'-->
-		<link rel="stylesheet" type="text/css" href="main.css">
-		<title>ICM Tools</title>
-		<script>
-			// r.SL_Select(1)
-			// r.SL_Select({a:1,b:{a:1,b:2,c:[1,2,3]}})
-			
-			window.addEventListener("load",function(){
-				window.r = {}
-				Object.keys(window.rb).forEach(function(key){
-					window.r[key] = registerScript(window.rb[key])
-				})
-			})
-			
-			function registerScript(func){
-				var data = /function\s*(.*?)\s*\((.*?)\){\s*?\/\*((.|\s)*?)\*\/\s*?}/.exec(func.toString())
-				var aArgs = data[2].split(",")
-				var rbBody = data[3]
+    <head>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <meta charset='utf-8'>
+        <base href='%mainDirURI%'>
+        <link rel="stylesheet" type="text/css" href="main.css">
+        <title>ICM Tools</title>
+		<script>window.debugMode=2;</script>
+		
+        <script>
+            // r.SL_Select(1)
+            // r.SL_Select({a:1,b:{a:1,b:2,c:[1,2,3]}})
+            
+            window.addEventListener("load",function(){
+                window.r = {}
+                Object.keys(window.rb).forEach(function(key){
+                    window.r[key] = registerScript(window.rb[key])
+                })
+            })
+            
+            function registerScript(func){
+                var data = /function\s*(.*?)\s*\((.*?)\){\s*?\/\*((.|\s)*?)\*\/\s*?}/.exec(func.toString())
+                var aArgs = data[2]=="" ? [] : data[2].split(",")
+                var rbBody = data[3]
 				
-				sArgs=JSON.stringify("require('json');\n") + "+\n"
-				aArgs.forEach(function(argument){
-					sArgs = sArgs + JSON.stringify(argument) + "+" + JSON.stringify("= JSON.parse(") + "+" + "prepareArgument(" + argument + ")" + "+" + JSON.stringify(");\n")
-				})
+				//Execution modes
+                const DebugExec1 = "console.log(data)"
+				const DebugExec2 = "window.msgbox(data)"
+				const DistrExec = "window.executeRubyScript(data)"
+				var CrntExec = window.debugMode ? (window.debugMode==1?DebugExec1:DebugExec2) : DistrExec
 				
-				var jsBody = "var data = " + sArgs + "+" + JSON.stringify(rbBody) + "; console.log(data)"
-				var aCons = aArgs
-				aCons.push(jsBody)
-				return (Function.constructor.apply(this,aCons))
-			}
-			function prepareArgument(arg){
-				try {
-					return JSON.stringify(JSON.stringify(arg))
-				} catch(e) {
-					console.log(arg)
-					throw new Error("Error in prepareArgument")
+				// If argument exists then 
+				if(aArgs.length > 0){
+					sArgs = JSON.stringify("require('json');\n") + "+\n"
+					aArgs.forEach(function(argument){
+						sArgs = sArgs + JSON.stringify(argument) + "+" + JSON.stringify("= JSON.parse(") + "+" + "prepareArgument(" + argument + ")" + "+" + JSON.stringify(");\n")
+					})
+                }
+				
+				//Construct javascript
+				var jsBody = "var data = " + (aArgs.length>0 ? sArgs + "+" : "") + JSON.stringify(rbBody) + ";\n" + CrntExec
+                aArgs.push(jsBody)
+                return (Function.constructor.apply(this,aArgs))
+            }
+            function prepareArgument(arg){
+                try {
+                    return JSON.stringify(JSON.stringify(arg))
+                } catch(e) {
+                    console.log(arg)
+                    throw new Error("Error in prepareArgument")
+                }
+            }
+			
+			function toggleHandler(){
+				var tb=document.getElementById("toggleButton")
+				tb.className = tb.className=="arrowDown" ? "arrowUp" : "arrowDown"
+				if(window.debugMode>0) console.log("Toggle button clicked")
+				
+				var group = document.getElementsByClassName("groupContent")[0]
+				if(tb.className=="arrowDown"){
+					//close window
+					(function(){
+						window.guiResize(group.clientWidth+2,group.clientHeight+2)
+					})()
+				} else {
+					//open window
+					(function(){
+						window.guiResize(document.body.clientWidth+2,document.body.clientHeight+2)
+					})()
 				}
 			}
-		</script>
-		
-		
-		<script>
-			window.rb = window.rb ? window.rb : {}
-			window.rb["SL_Recent"] = function(){/*
-			    require_relative('libs\WSLocalStorage.rb')
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				selectionLists = WSApplication.current_database.model_object_collection('Selection list')
-				localStorage[:id] = selectionLists[-1].id
-			*/}
-			
-			window.rb["SL_Append"] = function(){/*
-				require_relative('libs\WSLocalStorage.rb')
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				if localStorage[:id]
-				  net = WSApplication.current_network
-				  net.load_selection localStorage[:id]
-				  net.save_selection localStorage[:id]
-				end
-			*/}
-			
-			window.rb["SL_Subtract"] = function(){/*
-				require_relative('libs\WSLocalStorage.rb')
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				if localStorage[:id]
-				  net = WSApplication.current_network
-				  to_remove = {}
-				  net.table_names.each do |table|
-					to_remove[table] = []
-					net.row_object_collection_selection(table).each do |ro|
-					  to_remove[table].push(ro.id)
-					end
-				  end
-				  
-				  net.clear_selection
-				  net.load_selection localStorage[:id]
-				  
-				  net.table_names.each do |table|
-					try_remove = to_remove[table]
-					net.row_object_collection_selection(table).each do |ro|
-					  if try_remove.index ro.id
-						ro.selected = false
-					  end
-					end
-				  end
-				  
-				  net.save_selection localStorage[:id]
-				end
-			*/}
-			
-			window.rb["SL_Clear"] = function(){/*
-				require_relative('libs\WSLocalStorage.rb')
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				if localStorage[:id]
-				  net = WSApplication.current_network
-				  net.clear_selection
-				  net.save_selection localStorage[:id]
-				end
-			*/}
-			
-			window.rb["SL_Overwrite"] = function(){/*
-				require_relative('libs\WSLocalStorage.rb')
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				if localStorage[:id]
-				  WSApplication.current_network.save_selection localStorage[:id]
-				end
-			*/}
-			
-			window.rb["SL_Select"] = function(id){/*
-				require_relative('libs\WSLocalStorage.rb')
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				localStorage[:id] = id
-			*/}
-			
-			window.rb["SL_Temporary"] = function(){/*
-				require_relative('libs\WSLocalStorage.rb')
-				require_relative('libs\WSVirtualSL.rb')
-				
-				localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
-				sl = WSVirtualSL.new
-				
-				if localStorage[:tmp_list]
-				  localStorage[:tmp_list].push(sl)
-				  localStorage[:isTemporary] = true
-				  return localStorage[:tmp_list].length
-				end
-			*/}
-		</script>
-	</head>
-	<body>
-		<div id="Geoplan" class="tabcontent">
-			<button class="ribButton" onclick='handle("USTrace")'>
-				<div class="image" style="background-image:url('img\\SelectionTool_UpstreamTrace.png');"></div>
-				<div class="describer">
-					<span>US Trace</span>
-				</div>
-			</button>
-			<button class="ribButton" onclick='handle("DSTrace")'>
-				<div class="image" style="background-image:url('img\\SelectionTool_DownstreamTrace.png');"></div>
-				<div class="describer">
-					<span>DS Trace</span>
-				</div>
-			</button>
-		</div>
-	</body>
+        </script>
+        
+        
+        <script>
+            window.rb = window.rb ? window.rb : {}
+            window.rb["SL_Recent"] = function(){/*
+                require_relative('libs\WSLocalStorage.rb')
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                selectionLists = WSApplication.current_database.model_object_collection('Selection list')
+                localStorage[:id] = selectionLists[-1].id
+            */}
+            
+            window.rb["SL_Append"] = function(){/*
+                require_relative('libs\WSLocalStorage.rb')
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                if localStorage[:id]
+                  net = WSApplication.current_network
+                  net.load_selection localStorage[:id]
+                  net.save_selection localStorage[:id]
+                end
+            */}
+            
+            window.rb["SL_Subtract"] = function(){/*
+                require_relative('libs\WSLocalStorage.rb')
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                if localStorage[:id]
+                  net = WSApplication.current_network
+                  to_remove = {}
+                  net.table_names.each do |table|
+                    to_remove[table] = []
+                    net.row_object_collection_selection(table).each do |ro|
+                      to_remove[table].push(ro.id)
+                    end
+                  end
+                  
+                  net.clear_selection
+                  net.load_selection localStorage[:id]
+                  
+                  net.table_names.each do |table|
+                    try_remove = to_remove[table]
+                    net.row_object_collection_selection(table).each do |ro|
+                      if try_remove.index ro.id
+                        ro.selected = false
+                      end
+                    end
+                  end
+                  
+                  net.save_selection localStorage[:id]
+                end
+            */}
+            
+            window.rb["SL_Clear"] = function(){/*
+                require_relative('libs\WSLocalStorage.rb')
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                if localStorage[:id]
+                  net = WSApplication.current_network
+                  net.clear_selection
+                  net.save_selection localStorage[:id]
+                end
+            */}
+            
+            window.rb["SL_Overwrite"] = function(){/*
+                require_relative('libs\WSLocalStorage.rb')
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                if localStorage[:id]
+                  WSApplication.current_network.save_selection localStorage[:id]
+                end
+            */}
+            
+            window.rb["SL_Select"] = function(id){/*
+                require_relative('libs\WSLocalStorage.rb')
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                localStorage[:id] = id
+            */}
+            
+            window.rb["SL_Temporary"] = function(){/*
+                require_relative('libs\WSLocalStorage.rb')
+                require_relative('libs\WSVirtualSL.rb')
+                
+                localStorage = WSLocalStorage.new("a8344089-9f06-4058-9955-57283c090659")
+                sl = WSVirtualSL.new
+                
+                if localStorage[:tmp_list]
+                  localStorage[:tmp_list].push(sl)
+                  localStorage[:isTemporary] = true
+                  return localStorage[:tmp_list].length
+                end
+            */}
+        </script>
+    </head>
+    <body>
+        <div class="groupContent">
+            <div style="width=100%">
+				<button class="ribButton" onclick='window.r.SL_Recent()'>
+					<div class="image" style="background-image:url('resources\\SL_Recent.png');"></div>
+					<div class="describer">
+						<span>Select Recent</span>
+					</div>
+				</button>
+				<button class="ribButton" onclick='window.r.SL_Append()'>
+					<div class="image" style="background-image:url('resources\\SL_Append.png');"></div>
+					<div class="describer">
+						<span>Append</span>
+					</div>
+				</button>
+				<button class="ribButton" onclick='window.r.SL_Subtract()'>
+					<div class="image" style="background-image:url('resources\\SL_Subtract.png');"></div>
+					<div class="describer">
+						<span>Subtract</span>
+					</div>
+				</button>
+				<button class="ribButton" onclick='window.r.SL_Clear()'>
+					<div class="image" style="background-image:url('resources\\SL_Clear.png');"></div>
+					<div class="describer">
+						<span>Clear</span>
+					</div>
+				</button>
+				<button class="ribButton" onclick='window.r.SL_Overwrite()'>
+					<div class="image" style="background-image:url('resources\\SL_Overwrite.png');"></div>
+					<div class="describer">
+						<span>Overwrite</span>
+					</div>
+				</button>
+				<button class="ribButton" onclick='window.r.SL_Temporary()'>
+					<div class="image" style="background-image:url('resources\\SL_Temporary.png');"></div>
+					<div class="describer">
+						<span>Create Temporary</span>
+					</div>
+				</button>
+			</div>
+			<div class="groupTitle">
+				<center>Selection lists</center>
+				<button class="btnToggle" onclick='toggleHandler()'>
+					<span id="toggleButton" class="arrowDown"></span>
+				</button>
+			</div>
+        </div>
+    </body>
 </html>
