@@ -95,8 +95,6 @@ HKEY_CURRENT_CONFIG,HKCC
 )
 
 BUILTIN_LABELS := "GuiClose GuiContextMenu GuiDropFiles GuiEscape GuiSize OnClipboardChange"
-WIDTH := 800
-HEIGHT := 600
 
 ; __________________________________________________________________________________________________
 ; Global variables
@@ -131,7 +129,7 @@ OnExit, LabelOnExit
 ; 	● http://ahkscript.org/boards/viewtopic.php?t=5714&p=33477#p33477
 ; 	● http://ahkscript.org/boards/viewtopic.php?f=14&t=5778
 Gui,+ToolWindow +AlwaysOnTop
-Gui, Add, ActiveX, w%WIDTH% h%HEIGHT% x0 y0 vwb, Shell.Explorer
+Gui, Add, ActiveX, w1000 h1000 x0 y0 vwb, Shell.Explorer
 wb.Navigate("about:<!DOCTYPE html><meta http-equiv='X-UA-Compatible' content='IE=edge'>")
 while wb.readyState < 4
 	Sleep 10
@@ -254,7 +252,7 @@ for key, val in builtinLabels {
 trigger("OnClipboardChange")
 OnMessage(0x100, "WB_onKey", 2) ; support for key down
 OnMessage(0x101, "WB_onKey", 2) ; support for key up 
-Gui, Show, w%WIDTH% h%HEIGHT%, % document.title
+Gui, Show, w100 h100, % document.title
 
 ;Connect into IE events
 ComObjConnect(wb,"WB_")
@@ -270,6 +268,8 @@ WB_TitleChange(event,newTitle){
 
 ;Custom function for resizing gui
 WB_Resize(w,h){
+	w:=w*0.7
+	h:=h*0.75
 	Gui, Show, W%w% H%h%
 }
 

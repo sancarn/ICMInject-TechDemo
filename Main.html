@@ -12,6 +12,13 @@
             // r.SL_Select(1)
             // r.SL_Select({a:1,b:{a:1,b:2,c:[1,2,3]}})
             
+			window.addEventListener("load",function(){
+				setTimeout(function(){
+					var group = document.getElementsByClassName("groupContent")[0]
+					window.guiResize(group.clientWidth+2,group.clientHeight+2);
+				},0)
+			})
+			
             window.addEventListener("load",function(){
                 window.r = {}
                 Object.keys(window.rb).forEach(function(key){
@@ -32,11 +39,14 @@
 				
 				// If argument exists then 
 				if(aArgs.length > 0){
-					sArgs = JSON.stringify("require('json');\n") + "+\n"
+					tmpArr = [JSON.stringify("require('json');\n")]
 					aArgs.forEach(function(argument){
-						sArgs = sArgs + JSON.stringify(argument) + "+" + JSON.stringify("= JSON.parse(") + "+" + "prepareArgument(" + argument + ")" + "+" + JSON.stringify(");\n")
+						tmpArr.push(JSON.stringify(argument) + "+" + JSON.stringify("= JSON.parse(") + "+" + "prepareArgument(" + argument + ")" + "+" + JSON.stringify(");\n"))
 					})
+					sArgs = tmpArr.join("+\n")
+					//window.msgbox(sArgs)
                 }
+				
 				
 				//Construct javascript
 				var jsBody = "var data = " + (aArgs.length>0 ? sArgs + "+" : "") + JSON.stringify(rbBody) + ";\n" + CrntExec
@@ -58,6 +68,7 @@
 				if(window.debugMode>0) console.log("Toggle button clicked")
 				
 				var group = document.getElementsByClassName("groupContent")[0]
+				var body  = document.getElementsByClassName("body")[0]
 				if(tb.className=="arrowDown"){
 					//close window
 					(function(){
@@ -66,10 +77,20 @@
 				} else {
 					//open window
 					(function(){
-						window.guiResize(document.body.clientWidth+2,document.body.clientHeight+2)
+						window.guiResize(body.clientWidth+2,body.clientHeight+2)
 					})()
 				}
 			}
+			
+			//Add hover hooks to buttons
+//			window.addEventListener("load", function(){
+//				document.getElementsByClassName("ribButton").forEach(function(el){
+//					el.addEventListener("hover",function(ev, el){
+//						window.msgbox(ev.toString() + "#" + el.toString())
+//					})
+//				})
+//			})
+			
         </script>
         
         
@@ -158,54 +179,86 @@
                   return localStorage[:tmp_list].length
                 end
             */}
+			
+			window.rb["SL_GetRootObjects"] = function(){/*
+				iwdb=WSApplication.current_database
+				objects = []
+				iwdb.root_model_objects.each do |mo|
+					objects.push({
+						"id"=>mo.id,
+						"name"=>mo.name,
+						"type"=>mo.type
+					})
+				end
+				return objects
+			*/}
+			window.rb["SL_GetChildObjects"] = function(type,id){/*
+				iwdb=WSApplication.current_database
+				pmo = iwdb.db.model_object_from_type_and_id(type, id)
+				objects = []
+				pmo.children.each do |mo|
+					objects.push({
+						"id"=>mo.id,
+						"name"=>mo.name,
+						"type"=>mo.type
+					})
+				end
+				return objects
+			*/}
         </script>
     </head>
     <body>
-        <div class="groupContent">
-            <div style="width=100%">
-				<button class="ribButton" onclick='window.r.SL_Recent()'>
-					<div class="image" style="background-image:url('resources\\SL_Recent.png');"></div>
-					<div class="describer">
-						<span>Select Recent</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='window.r.SL_Append()'>
-					<div class="image" style="background-image:url('resources\\SL_Append.png');"></div>
-					<div class="describer">
-						<span>Append</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='window.r.SL_Subtract()'>
-					<div class="image" style="background-image:url('resources\\SL_Subtract.png');"></div>
-					<div class="describer">
-						<span>Subtract</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='window.r.SL_Clear()'>
-					<div class="image" style="background-image:url('resources\\SL_Clear.png');"></div>
-					<div class="describer">
-						<span>Clear</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='window.r.SL_Overwrite()'>
-					<div class="image" style="background-image:url('resources\\SL_Overwrite.png');"></div>
-					<div class="describer">
-						<span>Overwrite</span>
-					</div>
-				</button>
-				<button class="ribButton" onclick='window.r.SL_Temporary()'>
-					<div class="image" style="background-image:url('resources\\SL_Temporary.png');"></div>
-					<div class="describer">
-						<span>Create Temporary</span>
-					</div>
-				</button>
+		<div class="body">
+			<div class="groupContent">
+				<div style="width=100%">
+					<button class="ribButton" onclick='window.r.SL_Recent()'>
+						<div class="image" style="background-image:url('resources\\SL_Recent.png');"></div>
+						<div class="describer">
+							<span>Select Recent</span>
+						</div>
+					</button>
+					<button class="ribButton" onclick='window.r.SL_Append()'>
+						<div class="image" style="background-image:url('resources\\SL_Append.png');"></div>
+						<div class="describer">
+							<span>Append</span>
+						</div>
+					</button>
+					<button class="ribButton" onclick='window.r.SL_Subtract()'>
+						<div class="image" style="background-image:url('resources\\SL_Subtract.png');"></div>
+						<div class="describer">
+							<span>Subtract</span>
+						</div>
+					</button>
+					<button class="ribButton" onclick='window.r.SL_Clear()'>
+						<div class="image" style="background-image:url('resources\\SL_Clear.png');"></div>
+						<div class="describer">
+							<span>Clear</span>
+						</div>
+					</button>
+					<button class="ribButton" onclick='window.r.SL_Overwrite()'>
+						<div class="image" style="background-image:url('resources\\SL_Overwrite.png');"></div>
+						<div class="describer">
+							<span>Overwrite</span>
+						</div>
+					</button>
+					<button class="ribButton" onclick='window.r.SL_Temporary()'>
+						<div class="image" style="background-image:url('resources\\SL_Temporary.png');"></div>
+						<div class="describer">
+							<span>Create Temporary</span>
+						</div>
+					</button>
+				</div>
+				<div class="groupTitle">
+					<center>Selection lists</center>
+					<button class="btnToggle" onclick='toggleHandler()'>
+						<span id="toggleButton" class="arrowDown"></span>
+					</button>
+				</div>
 			</div>
-			<div class="groupTitle">
-				<center>Selection lists</center>
-				<button class="btnToggle" onclick='toggleHandler()'>
-					<span id="toggleButton" class="arrowDown"></span>
-				</button>
+			<div class="panel" style="width:100%; height:400px">
+				<div id="tree"></div>
+				
 			</div>
-        </div>
+		</div>
     </body>
 </html>
