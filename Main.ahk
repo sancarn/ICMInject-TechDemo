@@ -274,14 +274,31 @@ WB_Resize(w,h){
 }
 
 ;Custom function for injecting ruby script
-injectRubyScript(data,pid){
-	if window.debugMode
+injectRubyScript(data,callback,pid){
+	if !(injector := ComObjConnect("{5c172d3c-c8bf-47b0-80a4-a455420a6911}"))
 	{
-		msgbox, %pid%:`n%data%
-	} else {
-		;INJECT
-		msgbox, todo
+		shell := ComObjCreate("WScript.Shell")
+		
+		if A_IsCompiled
+			command = "ICMInject.exe"
+		else
+			command = "%A_AhkPath%" "%injectorScript%"
+		
+		
+		
+		exec := shell.Exec(ComSpec " /C " command)
+		sleep,500
+		if !(injector := ComObjConnect("{5c172d3c-c8bf-47b0-80a4-a455420a6911}")){
+			msgbox, Something has gone very wrong!!
+		}
 	}
+	
+	
+	if !pid
+		Winget,pid, pid, ahk_exe InnovyzeWC.exe
+	if callback
+		injector.callbacks[pid] := callback
+	injector.execute(data,"a8344089-9f06-4058-9955-57283c090659",pid)
 }
 
 ;Custom function mostly for debugging

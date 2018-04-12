@@ -34,7 +34,7 @@
 				//Execution modes
                 const DebugExec1 = "console.log(data)"
 				const DebugExec2 = "window.msgbox(data)"
-				const DistrExec = "window.executeRubyScript(data)"
+				const DistrExec = "window.executeRubyScript(data,callback)"
 				var CrntExec = window.debugMode ? (window.debugMode==1?DebugExec1:DebugExec2) : DistrExec
 				
 				// If argument exists then 
@@ -47,9 +47,12 @@
 					//window.msgbox(sArgs)
                 }
 				
+				//Always add a callback.
+				//When called normally, the callback will be undefined, but this at least allows a callback to be defined.
+				aArgs.push("callback")
 				
-				//Construct javascript
-				var jsBody = "var data = " + (aArgs.length>0 ? sArgs + "+" : "") + JSON.stringify(rbBody) + ";\n" + CrntExec
+				//Construct javascript        aArgs>1 == more than callback
+				var jsBody = "var data = " + (aArgs.length>1 ? sArgs + "+" : "") + JSON.stringify( "lambda do\n" + rbBody + "\nend.call") + ";\n" + CrntExec
                 aArgs.push(jsBody)
                 return (Function.constructor.apply(this,aArgs))
             }
